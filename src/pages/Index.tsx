@@ -21,7 +21,7 @@ const Index = () => {
               <Target className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              FindingMap
+              FundingMap
             </span>
           </div>
           <div className="flex items-center space-x-6">
