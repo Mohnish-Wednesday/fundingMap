@@ -1,32 +1,44 @@
 import React, { useState } from 'react';
-import { ArrowRight, Search, Download, Zap, Database, Target, Users } from 'lucide-react';
+import { ArrowRight, Search, Download, Zap, Database, Target, Users, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTheme } from 'next-themes';
 import ChatbotInterface from '@/components/ChatbotInterface';
 import FeatureCard from '@/components/FeatureCard';
 import Footer from '@/components/Footer';
 
 const Index = () => {
   const [showChatbot, setShowChatbot] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Navigation */}
-      <nav className="w-full px-6 py-4 backdrop-blur-md bg-white/80 border-b border-slate-200/50 sticky top-0 z-50">
+      <nav className="w-full px-6 py-4 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
               <Target className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
               FundingMap
             </span>
           </div>
           <div className="flex items-center space-x-6">
-            <a href="#features" className="text-slate-600 hover:text-slate-900 transition-colors">Features</a>
-            <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 transition-colors">How it Works</a>
+            <a href="#features" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors">Features</a>
+            <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors">How it Works</a>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="w-9 h-9"
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
             <Button variant="outline" size="sm">
               Sign In
             </Button>
@@ -35,21 +47,21 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 px-6">
+      <section className="relative py-20 px-6 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-200 rounded-full px-4 py-2 mb-8">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             <span className="text-blue-700 text-sm font-medium">AI-Powered Competitor Intelligence</span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-800 bg-clip-text text-transparent mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-800 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent mb-6">
             Find Out Who's Fueling Your
-            <span className="block bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
               Competitors' Growth
             </span>
           </h1>
           
-          <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 max-w-3xl mx-auto leading-relaxed">
             Discover the investors, funding rounds, and market players behind your competition. 
             Get instant insights into funding patterns and strategic opportunities in your industry.
           </p>
@@ -70,25 +82,25 @@ const Index = () => {
 
           {/* Preview Cards */}
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+            <Card className="border-0 shadow-lg bg-white dark:bg-white backdrop-blur-sm hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6 text-center">
                 <Search className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                <h3 className="font-semibold text-slate-800 mb-2">Smart Discovery</h3>
-                <p className="text-slate-600 text-sm">AI-powered search across funding databases</p>
+                <h3 className="font-semibold text-slate-800 dark:text-slate-900 mb-2">Smart Discovery</h3>
+                <p className="text-slate-600 dark:text-slate-700 text-sm">AI-powered search across funding databases</p>
               </CardContent>
             </Card>
-            <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+            <Card className="border-0 shadow-lg bg-white dark:bg-white backdrop-blur-sm hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6 text-center">
                 <Database className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                <h3 className="font-semibold text-slate-800 mb-2">Live Data</h3>
-                <p className="text-slate-600 text-sm">Real-time scraping of investment data</p>
+                <h3 className="font-semibold text-slate-800 dark:text-slate-900 mb-2">Live Data</h3>
+                <p className="text-slate-600 dark:text-slate-700 text-sm">Real-time scraping of investment data</p>
               </CardContent>
             </Card>
-            <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+            <Card className="border-0 shadow-lg bg-white dark:bg-white backdrop-blur-sm hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6 text-center">
                 <Download className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-                <h3 className="font-semibold text-slate-800 mb-2">Export Reports</h3>
-                <p className="text-slate-600 text-sm">Download detailed PDF reports</p>
+                <h3 className="font-semibold text-slate-800 dark:text-slate-900 mb-2">Export Reports</h3>
+                <p className="text-slate-600 dark:text-slate-700 text-sm">Download detailed PDF reports</p>
               </CardContent>
             </Card>
           </div>
@@ -101,13 +113,13 @@ const Index = () => {
       )}
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-6 bg-white/50">
+      <section id="features" className="py-20 px-6 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 dark:from-blue-800 dark:via-blue-700 dark:to-blue-600">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
               Everything You Need to Outpace Competition
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-800 dark:text-slate-200 max-w-2xl mx-auto">
               Comprehensive competitor intelligence at your fingertips
             </p>
           </div>
@@ -142,13 +154,13 @@ const Index = () => {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-6">
+      <section id="how-it-works" className="py-20 px-6 dark:bg-slate-800">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
               How It Works
             </h2>
-            <p className="text-xl text-slate-600">
+            <p className="text-xl text-slate-600 dark:text-slate-300">
               Three simple steps to competitor intelligence
             </p>
           </div>
@@ -175,8 +187,8 @@ const Index = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-6">
                   {item.step}
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">{item.title}</h3>
-                <p className="text-slate-600">{item.description}</p>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">{item.title}</h3>
+                <p className="text-slate-600 dark:text-slate-400">{item.description}</p>
               </div>
             ))}
           </div>

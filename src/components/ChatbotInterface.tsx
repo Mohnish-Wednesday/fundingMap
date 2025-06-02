@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Send, Bot, User, Download, ExternalLink, Rocket, Target, MapPin, Building2, Globe, Smartphone, Users, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Send, Bot, User, Download, ExternalLink, Rocket, Target, MapPin, Building2, Globe, Smartphone, Users, TrendingUp, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Toggle } from '@/components/ui/toggle';
+import { cn } from '@/lib/utils';
 
 interface ChatMessage {
   id: string;
@@ -42,7 +43,7 @@ interface CompanyInfo {
 }
 
 // API Configuration
-const API_KEY = 'AIzaSyB5M8si59tkFbcaAiz6-8D6nXLFNeIjJX8';
+const API_KEY = 'AIzaSyB5M8si59tkFbcaAiz6-8D6 nutrientes.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Base system prompt
@@ -172,8 +173,7 @@ const DOMAIN_COMPETITORS = {
               type: "Accelerator VC",
               focus: "Early Stage Startups",
               linkedin: "linkedin.com/company/surge-ventures",
-              email: "contact@surge.ventures"
-            }
+              email: "contact@surge.ventures"}
           ]
         },
         {
@@ -190,8 +190,7 @@ const DOMAIN_COMPETITORS = {
               type: "Impact VC",
               focus: "Healthcare & Education",
               linkedin: "linkedin.com/company/lightrock",
-              email: "india@lightrock.com"
-            }
+              email: "india@lightrock.com"}
           ]
         }
       ],
@@ -223,6 +222,10 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
   const [selectedCompetitors, setSelectedCompetitors] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [messageCount, setMessageCount] = useState(0);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportEmail, setExportEmail] = useState('');
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const domains = [
     'E-commerce', 'Fintech', 'Healthcare', 'EdTech', 'SaaS', 'AI/ML',
@@ -464,6 +467,14 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
     addMessage('bot', 'Welcome! Before we analyze your competitors, please tell me about your company. What does your company do, what industry are you in, who is your target market, and what makes your company unique?');
   }, []);
 
+  // Scroll to bottom on new message
+  useEffect(() => {
+    const element = document.getElementById('chat-messages');
+    if (element) {
+      element.scrollTop = element.scrollHeight;
+    }
+  }, [messages, competitorsList]);
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
     
@@ -515,9 +526,10 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
         addMessage('user', message);
       }
       
-      setCompetitorsList(mockCompetitorData);
+      setCompetitorsList(mockCompetitorData); // Use mock data for now
       setCurrentStep('competitor_selection');
-      await sendMessageToAI(message);
+      await sendMessageToAI(message); // Trigger AI for next step message
+
     } catch (error) {
       console.error('Error in handleCompetitorDetails:', error);
       addMessage('bot', 'Sorry, there was an error processing the competitor details. Please try again.');
@@ -574,10 +586,9 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
         return;
       }
 
-      const message = `Please analyze these competitors: ${selectedCompetitors.join(', ')}`;
-      addMessage('user', message);
-      setCurrentStep('analysis');
-      await sendMessageToAI(message);
+      // Instead of sending to AI, open the export dialog
+      setShowExportDialog(true);
+
     } catch (error) {
       console.error('Error in handleFinalAnalysis:', error);
       addMessage('bot', 'Sorry, there was an error generating the analysis. Please try again.');
@@ -597,7 +608,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
     if (currentStep === 'competitor_selection' && competitorsList.length > 0) {
       return (
         <div className="space-y-4">
-          <div className="text-sm text-slate-600 mb-4">
+          <div className="text-sm text-slate-600 mb-4 dark:text-slate-300">
             Select competitors to analyze (toggle to see details):
           </div>
           {competitorsList.map((competitor, index) => (
@@ -605,36 +616,36 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
               <Toggle
                 pressed={selectedCompetitors.includes(competitor.name)}
                 onPressedChange={() => toggleCompetitor(competitor.name)}
-                className="w-full justify-start p-4 h-auto"
+                className="w-full justify-start p-4 h-auto dark:bg-slate-700 dark:text-white dark:border-slate-600 data-[state=on]:dark:bg-blue-900 data-[state=on]:dark:text-white"
               >
                 <div className="flex items-center space-x-3 w-full">
-                  <Building2 className="w-5 h-5 text-blue-600" />
+                  <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-300" />
                   <div className="flex-1 text-left">
-                    <div className="font-semibold">{competitor.name}</div>
-                    <div className="text-sm text-slate-600">
-                      {competitor.website && <span>🌐 {competitor.website}</span>}
-                      <span className="ml-2 text-green-600 font-medium">{competitor.total_funding}</span>
+                    <div className="font-semibold text-slate-900 dark:text-white">{competitor.name}</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-300">
+                      {competitor.website && <span>🌐 <a href={competitor.website} target="_blank" rel="noopener noreferrer" className="hover:underline dark:text-blue-400">{competitor.website}</a></span>}
+                      <span className="ml-2 text-green-600 font-medium dark:text-green-400">{competitor.total_funding}</span>
                     </div>
                   </div>
                 </div>
               </Toggle>
               
               {selectedCompetitors.includes(competitor.name) && (
-                <Card className="ml-8 border border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50">
+                <Card className="ml-8 border border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800">
                   <CardContent className="p-4">
                     <div className="space-y-4">
                       {/* Description */}
                       <div>
-                        <h5 className="font-semibold text-slate-700 mb-2">Description:</h5>
-                        <p className="text-sm text-slate-600">{competitor.description}</p>
+                        <h5 className="font-semibold text-slate-700 mb-2 dark:text-slate-200">Description:</h5>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{competitor.description}</p>
                       </div>
 
                       {/* Key Features */}
                       <div>
-                        <h5 className="font-semibold text-slate-700 mb-2">Key Features:</h5>
+                        <h5 className="font-semibold text-slate-700 mb-2 dark:text-slate-200">Key Features:</h5>
                         <div className="space-y-1">
                           {competitor.key_features.map((feature, idx) => (
-                            <div key={idx} className="text-sm text-slate-600 flex items-start">
+                            <div key={idx} className="text-sm text-slate-600 flex items-start dark:text-slate-400">
                               <span className="mr-2">•</span>
                               <span>{feature}</span>
                             </div>
@@ -645,16 +656,16 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
                       {/* Business Details */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <h5 className="font-semibold text-slate-700 mb-2">Business Details:</h5>
-                          <div className="space-y-2 text-sm">
+                          <h5 className="font-semibold text-slate-700 mb-2 dark:text-slate-200">Business Details:</h5>
+                          <div className="space-y-2 text-sm dark:text-slate-400">
                             <p><span className="font-medium">Founded:</span> {competitor.year_founded}</p>
                             <p><span className="font-medium">Stage:</span> {competitor.funding_stage}</p>
                             <p><span className="font-medium">Model:</span> {competitor.business_model}</p>
                           </div>
                         </div>
                         <div>
-                          <h5 className="font-semibold text-slate-700 mb-2">Market Focus:</h5>
-                          <div className="space-y-2 text-sm">
+                          <h5 className="font-semibold text-slate-700 mb-2 dark:text-slate-200">Market Focus:</h5>
+                          <div className="space-y-2 text-sm dark:text-slate-400">
                             <p><span className="font-medium">Region:</span> {competitor.region}</p>
                             <p><span className="font-medium">Category:</span> {competitor.sub_category}</p>
                             <p><span className="font-medium">Audience:</span> {competitor.target_audience}</p>
@@ -668,7 +679,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
                           href={competitor.website} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                          className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           <Globe className="w-4 h-4" />
                           <span>Visit Website</span>
@@ -684,7 +695,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
           {selectedCompetitors.length > 0 && (
             <Button 
               onClick={handleFinalAnalysis}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 dark:bg-green-700 dark:hover:bg-green-600"
             >
               <Download className="w-4 h-4 mr-2" />
               Generate Full Report ({selectedCompetitors.length} competitors)
@@ -696,40 +707,64 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
     return null;
   };
 
+  // Function to restart the chat
+  const restartChat = () => {
+    setMessages([]);
+    setCurrentStep('company_info');
+    setCompanyInfo(null);
+    setHasCompetitors(null);
+    setWebsiteUrl('');
+    setAppLink('');
+    setSelectedDomain('');
+    setSelectedSubdomain('');
+    setSelectedRegion('');
+    setCompetitorsList([]);
+    setSelectedCompetitors([]);
+    setInputValue('');
+    setMessageCount(0);
+    setShowExportDialog(false); // Close export dialog on restart
+    addMessage('bot', 'Welcome! Before we analyze your competitors, please tell me about your company. What does your company do, what industry are you in, who is your target market, and what makes your company unique?');
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl h-[700px] bg-white shadow-2xl">
+      <Card className="w-full max-w-4xl h-[700px] bg-white dark:bg-slate-900 shadow-2xl">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-50 to-slate-50">
+          <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-50 to-slate-50 dark:from-slate-800 dark:to-slate-800 dark:border-slate-700">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full flex items-center justify-center">
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900">FundingMap Assistant</h3>
-                <p className="text-sm text-slate-600">
+                <h3 className="font-semibold text-slate-900 dark:text-white">FundingMap Assistant</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   {currentStep === 'company_info' ? 'Tell me about your company' : 'Discover Your Competitors\' Investors'}
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="sm" onClick={restartChat} title="Restart Chat" className="dark:text-white dark:hover:bg-slate-800">
+                <RefreshCcw className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onClose} title="Close Chat" className="dark:text-white dark:hover:bg-slate-800">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Messages and Competitor Cards */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div id="chat-messages" className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                   message.type === 'user' 
                     ? 'bg-blue-600 text-white' 
-                    : 'bg-slate-100 text-slate-900'
+                    : 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100'
                 }`}>
                   <div className="flex items-start space-x-2">
                     {message.type === 'bot' && (
-                      <Bot className="w-4 h-4 mt-0.5 text-blue-600" />
+                      <Bot className="w-4 h-4 mt-0.5 text-blue-600 dark:text-blue-300" />
                     )}
                     {message.type === 'user' && (
                       <User className="w-4 h-4 mt-0.5 text-white" />
@@ -742,9 +777,9 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
 
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-slate-100 rounded-2xl px-4 py-3">
+                <div className="bg-slate-100 rounded-2xl px-4 py-3 dark:bg-slate-700">
                   <div className="flex items-center space-x-2">
-                    <Bot className="w-4 h-4 text-blue-600" />
+                    <Bot className="w-4 h-4 text-blue-600 dark:text-blue-300" />
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                       <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
@@ -757,138 +792,173 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ onClose }) => {
 
             {/* Render competitor cards */}
             {renderCompetitorCards()}
+            
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input Area */}
-          <div className="p-6 border-t bg-slate-50">
-            {currentStep === 'initial' && hasCompetitors === null && (
-              <div className="space-y-3 mb-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <Button 
-                    onClick={() => handleCompetitorChoice(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white py-4"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Yes, I have competitors
-                  </Button>
-                  <Button 
-                    onClick={() => handleCompetitorChoice(false)}
-                    variant="outline"
-                    className="py-4"
-                  >
-                    <TrendingUp className="w-4 h-4 mr-2" />
-                    No, help me find them
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {currentStep === 'have_competitors' && (
-              <div className="space-y-4 mb-4">
+          <div className="p-6 border-t bg-slate-50 dark:bg-slate-800 dark:border-slate-700">
+            {showExportDialog ? (
+              <div className="space-y-4">
+                <h3 className="text-md font-semibold text-slate-800 mb-2 dark:text-white">Send Report via Email</h3>
                 <div className="space-y-2">
-                  <Label htmlFor="website">Competitor Website URL (optional)</Label>
+                  <Label htmlFor="export-email" className="dark:text-slate-300">Recipient Email</Label>
                   <Input
-                    id="website"
-                    placeholder="https://competitor.com"
-                    value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    id="export-email"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={exportEmail}
+                    onChange={(e) => setExportEmail(e.target.value)}
+                    className="dark:bg-slate-700 dark:text-white dark:border-slate-600"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="appstore">App Store / Play Store URL (optional)</Label>
-                  <Input
-                    id="appstore"
-                    placeholder="https://apps.apple.com/... or https://play.google.com/..."
-                    value={appLink}
-                    onChange={(e) => setAppLink(e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button onClick={handleCompetitorDetails} className="flex-1">
-                    <Globe className="w-4 h-4 mr-2" />
-                    Website
-                  </Button>
-                  <Button onClick={handleCompetitorDetails} variant="outline" className="flex-1">
-                    <Smartphone className="w-4 h-4 mr-2" />
-                    App Link
-                  </Button>
-                  <Button onClick={handleCompetitorDetails} variant="outline" className="flex-1">
-                    Don't Have
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => console.log('Send report to:', exportEmail)} // Placeholder for send logic
+                  disabled={!exportEmail || !selectedCompetitors.length}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 dark:bg-green-700 dark:hover:bg-green-600"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Report
+                </Button>
+                <Button variant="outline" onClick={() => setShowExportDialog(false)} className="w-full dark:text-white dark:border-slate-600 dark:hover:bg-slate-700">
+                  Cancel
+                </Button>
               </div>
-            )}
-
-            {currentStep === 'no_competitors_domain' && (
-              <div className="space-y-4 mb-4">
-                <div className="space-y-2">
-                  <Label>Select Domain</Label>
-                  <Select value={selectedDomain} onValueChange={handleDomainChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose your industry domain" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {domains.map((domain) => (
-                        <SelectItem key={domain} value={domain}>{domain}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {selectedDomain && (
-                  <div className="space-y-2">
-                    <Label>Select Subdomain</Label>
-                    <Select value={selectedSubdomain} onValueChange={handleSubdomainChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose specific area" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subdomains[selectedDomain as keyof typeof subdomains]?.map((subdomain) => (
-                          <SelectItem key={subdomain} value={subdomain}>{subdomain}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+            ) : (
+               <>
+                {currentStep === 'initial' && hasCompetitors === null && (
+                  <div className="space-y-3 mb-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button 
+                        onClick={() => handleCompetitorChoice(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white py-4 dark:bg-blue-700 dark:hover:bg-blue-600"
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        Yes, I have competitors
+                      </Button>
+                      <Button 
+                        onClick={() => handleCompetitorChoice(false)}
+                        variant="outline"
+                        className="py-4 dark:text-white dark:border-slate-600 dark:hover:bg-slate-700"
+                      >
+                        <TrendingUp className="w-4 h-4 mr-2" />
+                        No, help me find them
+                      </Button>
+                    </div>
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label>Select Region</Label>
-                  <Select value={selectedRegion} onValueChange={handleRegionChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose your target region" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {regions.map((region) => (
-                        <SelectItem key={region} value={region}>{region}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {currentStep === 'have_competitors' && ( /* Existing input logic */
+                  <div className="space-y-4 mb-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="website" className="dark:text-slate-300">Competitor Website URL (optional)</Label>
+                      <Input
+                        id="website"
+                        placeholder="https://competitor.com"
+                        value={websiteUrl}
+                        onChange={(e) => setWebsiteUrl(e.target.value)}
+                        className="dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="appstore" className="dark:text-slate-300">App Store / Play Store URL (optional)</Label>
+                      <Input
+                        id="appstore"
+                        placeholder="https://apps.apple.com/... or https://play.google.com/..."
+                        value={appLink}
+                        onChange={(e) => setAppLink(e.target.value)}
+                        className="dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button onClick={handleCompetitorDetails} className="flex-1 dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-white">
+                        <Globe className="w-4 h-4 mr-2" />
+                        Website
+                      </Button>
+                      <Button onClick={handleCompetitorDetails} variant="outline" className="flex-1 dark:text-white dark:border-slate-600 dark:hover:bg-slate-700">
+                        <Smartphone className="w-4 h-4 mr-2" />
+                        App Link
+                      </Button>
+                      <Button onClick={handleCompetitorDetails} variant="outline" className="flex-1 dark:text-white dark:border-slate-600 dark:hover:bg-slate-700">
+                        Don't Have
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 'no_competitors_domain' && (
+                  <div className="space-y-4 mb-4">
+                    <div className="space-y-2">
+                      <Label className="dark:text-slate-300">Select Domain</Label>
+                      <Select value={selectedDomain} onValueChange={handleDomainChange}>
+                        <SelectTrigger className="dark:bg-slate-700 dark:text-white dark:border-slate-600">
+                          <SelectValue placeholder="Choose your industry domain" />
+                        </SelectTrigger>
+                        <SelectContent className="dark:bg-slate-800 dark:text-white dark:border-slate-700">
+                          {domains.map((domain) => (
+                            <SelectItem key={domain} value={domain}>{domain}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {selectedDomain && ( /* Existing input logic */
+                      <div className="space-y-2">
+                        <Label className="dark:text-slate-300">Select Subdomain</Label>
+                        <Select value={selectedSubdomain} onValueChange={handleSubdomainChange}>
+                          <SelectTrigger className="dark:bg-slate-700 dark:text-white dark:border-slate-600">
+                            <SelectValue placeholder="Choose specific area" />
+                          </SelectTrigger>
+                          <SelectContent className="dark:bg-slate-800 dark:text-white dark:border-slate-700">
+                            {subdomains[selectedDomain as keyof typeof subdomains]?.map((subdomain) => (
+                              <SelectItem key={subdomain} value={subdomain}>{subdomain}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label className="dark:text-slate-300">Select Region</Label>
+                      <Select value={selectedRegion} onValueChange={handleRegionChange}>
+                        <SelectTrigger className="dark:bg-slate-700 dark:text-white dark:border-slate-600">
+                          <SelectValue placeholder="Choose your target region" />
+                        </SelectTrigger>
+                        <SelectContent className="dark:bg-slate-800 dark:text-white dark:border-slate-700">
+                          {regions.map((region) => (
+                            <SelectItem key={region} value={region}>{region}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Button 
+                      onClick={handleDomainSelection} 
+                      disabled={!selectedDomain || !selectedSubdomain || !selectedRegion}
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 dark:from-blue-700 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-500"
+                    >
+                      <Target className="w-4 h-4 mr-2" />
+                      Find Competitors
+                    </Button>
+                  </div>
+                )}
+
+                {/* Always show the chat input */} {/* Existing input logic */}
+                <div className="flex space-x-2">
+                  <Input
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Type your message..."
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1 dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                  />
+                  <Button onClick={handleSendMessage} disabled={isTyping} className="dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-white">
+                    <Send className="w-4 h-4" />
+                  </Button>
                 </div>
-
-                <Button 
-                  onClick={handleDomainSelection} 
-                  disabled={!selectedDomain || !selectedSubdomain || !selectedRegion}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
-                >
-                  <Target className="w-4 h-4 mr-2" />
-                  Find Competitors
-                </Button>
-              </div>
+               </>
             )}
-
-            {/* Always show the chat input */}
-            <div className="flex space-x-2">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type your message..."
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="flex-1"
-              />
-              <Button onClick={handleSendMessage} disabled={isTyping}>
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
           </div>
         </div>
       </Card>

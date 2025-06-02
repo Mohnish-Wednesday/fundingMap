@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -18,13 +17,13 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, col
   };
 
   return (
-    <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group">
+    <Card className="border-0 shadow-lg bg-white dark:bg-white backdrop-blur-sm hover:shadow-xl transition-all duration-300 group">
       <CardContent className="p-6">
         <div className={`w-16 h-16 rounded-2xl ${colorClasses[color]} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
           {icon}
         </div>
-        <h3 className="text-xl font-semibold text-slate-900 mb-3">{title}</h3>
-        <p className="text-slate-600 leading-relaxed">{description}</p>
+        <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-800 mb-3">{title}</h3>
+        <p className="text-slate-600 dark:text-slate-700 leading-relaxed">{description}</p>
       </CardContent>
     </Card>
   );
